@@ -97,6 +97,17 @@ class _TestFooNT(NamedTuple):
 
 # --------------------------------------------------------------------------------
 
+def test_init_dict_schema_mismatch_error_message() -> None:
+    with pytest.raises(ValueError) as exc_info:
+        pl.DataFrame(
+            {"a": [1], "c": [2]},
+            schema={"a": pl.Int64, "b": pl.Int64},
+        )
+
+    msg = str(exc_info.value)
+    assert "the given column-schema names do not match the data dictionary" in msg
+    assert "Missing columns: ['b']" in msg
+    assert "Extra columns: ['c']" in msg
 
 def test_init_dict() -> None:
     # Empty dictionary

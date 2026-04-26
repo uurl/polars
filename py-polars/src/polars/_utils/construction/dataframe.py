@@ -87,8 +87,16 @@ def dict_to_pydf(
 ) -> PyDataFrame:
     """Construct a PyDataFrame from a dictionary of sequences."""
     if isinstance(schema, Mapping) and data:
-        if not all((col in schema) for col in data):
-            msg = "the given column-schema names do not match the data dictionary"
+        data_cols = set(data)
+        schema_cols = set(schema)
+        if data_cols != schema_cols:
+            missing = sorted(schema_cols - data_cols)
+            extra = sorted(data_cols - schema_cols)
+            msg = (
+                "the given column-schema names do not match the data dictionary"
+                f"\n\nMissing columns: {missing}"
+                f"\nExtra columns: {extra}"
+            )
             raise ValueError(msg)
         data = {col: data[col] for col in schema}
 
