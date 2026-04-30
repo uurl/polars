@@ -123,12 +123,11 @@ Below we show an example where we use **group_by_dynamic** to compute:
 --8<-- "python/user-guide/transformations/time-series/rolling.py:group_by_dyn"
 ```
 
-## Grouping by rolling windows
+## Rolling windows
 
-The rolling operation, `rolling`, is another entrance to the `group_by`/`agg` context. But different
-from the `group_by_dynamic` where the windows are fixed by a parameter `every` and `period`. In a
-`rolling`, the windows are not fixed at all! They are determined by the values in the
-`index_column`.
+The rolling operation, `rolling`, is another entry point to the `group_by`/`agg` context. Unlike
+`group_by_dynamic`, where the windows are fixed by the `every` and `period` parameters, rolling
+windows are determined by the values in the `index_column`.
 
 So imagine having a time column with the values `{2021-01-06, 2021-01-10}` and a `period="5d"` this
 would create the following windows:
@@ -141,8 +140,8 @@ would create the following windows:
              |----------|
 ```
 
-Because the windows of a rolling group by are always determined by the values in the `DataFrame`
-column, the number of groups is always equal to the original `DataFrame`.
+Because the windows of a rolling operation are always determined by the values in the `DataFrame`
+column, the number of windows is always equal to the number of rows in the original `DataFrame`.
 
 ## Combining group by operations
 
