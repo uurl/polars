@@ -2882,7 +2882,8 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
         Parameters
         ----------
         path
-            File path to which the file should be written.
+            File path, file-like object, or `PartitionBy` scheme to which the file
+            should be written.
         compression : {'lz4', 'uncompressed', 'snappy', 'gzip', 'brotli', 'zstd'}
             Choose "zstd" for good compression performance.
             Choose "lz4" for fast compression/decompression.
@@ -3565,7 +3566,8 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
         Parameters
         ----------
         path
-            File path to which the file should be written.
+            File path, file-like object, or `PartitionBy` scheme to which the file
+            should be written.
         compression : {'uncompressed', 'lz4', 'zstd'}
             Choose "zstd" for good compression performance.
             Choose "lz4" for fast compression/decompression.
@@ -3861,7 +3863,8 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
         Parameters
         ----------
         path
-            File path to which the file should be written.
+            File path, file-like object, or `PartitionBy` scheme to which the file
+            should be written.
         include_bom
             Whether to include UTF-8 BOM in the CSV output.
         compression
@@ -4182,7 +4185,8 @@ naive plan: (run LazyFrame.explain(optimized=True) to see the optimized plan)
         Parameters
         ----------
         path
-            File path to which the file should be written.
+            File path, file-like object, or `PartitionBy` scheme to which the file
+            should be written.
         compression
             What compression format to use.
 
