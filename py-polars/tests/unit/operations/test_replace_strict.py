@@ -12,8 +12,26 @@ from polars.testing import assert_frame_equal, assert_series_equal
 def test_replace_strict_incomplete_mapping() -> None:
     lf = pl.LazyFrame({"a": [1, 2, 2, 3]})
 
-    with pytest.raises(InvalidOperationError, match="incomplete mapping"):
+    with pytest.raises(InvalidOperationError) as exc_info:
         lf.select(pl.col("a").replace_strict({2: 200, 3: 300})).collect()
+
+    msg = str(exc_info.value)
+    assert "incomplete mapping specified for `replace_strict`" in msg
+    assert "Missing values:" in msg
+    assert "\n\t1\n" in msg
+
+
+def test_replace_strict_incomplete_mapping_shows_missing_values() -> None:
+    s = pl.Series("a", [1, 2, 3, 4, 5])
+
+    with pytest.raises(InvalidOperationError) as exc_info:
+        s.replace_strict({1: 10, 2: 20})
+
+    msg = str(exc_info.value)
+    assert "Missing values:" in msg
+    assert "\n\t3\n" in msg
+    assert "\n\t4\n" in msg
+    assert "\n\t5\n" in msg
 
 
 def test_replace_strict_incomplete_mapping_null_raises() -> None:
