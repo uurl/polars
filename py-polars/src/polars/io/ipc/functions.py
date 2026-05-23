@@ -8,6 +8,7 @@ from typing import IO, TYPE_CHECKING, Literal
 import polars._reexport as pl
 import polars.functions as F
 from polars._dependencies import import_optional
+from polars._utils import NO_DEFAULT
 from polars._utils.deprecation import (
     deprecate_renamed_parameter,
     issue_deprecation_warning,
@@ -39,6 +40,7 @@ if TYPE_CHECKING:
 
     from polars import DataFrame, DataType, LazyFrame
     from polars._typing import SchemaDict, StorageOptionsDict
+    from polars._utils import NoDefault
     from polars.io.cloud import CredentialProviderFunction
 
 
@@ -387,7 +389,7 @@ def scan_ipc(
     glob: bool = True,
     storage_options: StorageOptionsDict | None = None,
     credential_provider: CredentialProviderFunction | Literal["auto"] | None = "auto",
-    memory_map: bool = True,
+    memory_map: bool | NoDefault = NO_DEFAULT,
     retries: int | None = None,
     file_cache_ttl: int | None = None,
     hive_partitioning: bool | None = None,
@@ -487,8 +489,9 @@ def scan_ipc(
     include_file_paths
         Include the path of the source file(s) as a column with this name.
     """
-    # Memory Mapping is now a no-op
-    _ = memory_map
+    if memory_map is not NO_DEFAULT:
+        msg = "the `memory_map` parameter was deprecated in 1.40.0 and has no effect."
+        issue_deprecation_warning(msg)
 
     sources = get_sources(source)
 
