@@ -1,3 +1,5 @@
+use std::ops::Not;
+
 use polars_core::prelude::*;
 use polars_core::utils::try_get_supertype;
 use polars_error::polars_ensure;
@@ -350,6 +352,8 @@ fn validate_new(new: &Series, old: &Series) -> PolarsResult<()> {
     Ok(())
 }
 
+const MAX_MISSING_VALUES: usize = 10;
+
 /// Ensure that all values were replaced.
 fn ensure_all_replaced(
     mask: &BooleanChunked,
@@ -362,13 +366,33 @@ fn ensure_all_replaced(
     } else {
         mask.null_count() == s.null_count()
     };
-    // Checking booleans is only relevant for the 'replace_by_single' path.
     let bools_check = !check_all || mask.all();
 
     let all_replaced = bools_check && nulls_check;
-    polars_ensure!(
-        all_replaced,
-        InvalidOperation: "incomplete mapping specified for `replace_strict`\n\nHint: Pass a `default` value to set unmapped values."
-    );
-    Ok(())
+    if all_replaced {
+        return Ok(());
+    }
+
+    let missing_values = get_missing_values(mask, s, check_all)?;
+    polars_bail!(
+        InvalidOperation:
+        "incomplete mapping specified for `replace_strict`\n\n\
+        Missing values: {}\n\n\
+        Hint: Pass a `default` value to set unmapped values.",
+        missing_values
+    )
+}
+
+fn get_missing_values(mask: &BooleanChunked, s: &Series, check_all: bool) -> PolarsResult<String> {
+    let missing_mask = if check_all {
+        mask.not()
+    } else {
+        mask.is_null()
+    };
+
+    let missing_mask = &missing_mask & &s.is_not_null();
+    let missing = s.filter(&missing_mask)?.unique_stable()?;
+
+    let missing = missing.head(Some(MAX_MISSING_VALUES));
+    Ok(format!("{missing:?}"))
 }
