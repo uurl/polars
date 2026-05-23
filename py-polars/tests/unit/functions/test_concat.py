@@ -144,6 +144,17 @@ def test_concat_invalid_schema_err_20355() -> None:
         pl.concat([lf1, lf2]).collect(engine="streaming")
 
 
+def test_concat_lazy_schema_mismatch_error_shows_position_24848() -> None:
+    lf1 = pl.LazyFrame({"product": ["a"], "sku": ["1"]})
+    lf2 = pl.LazyFrame({"sku": ["1"], "product": ["a"]})
+
+    with pytest.raises(
+        pl.exceptions.InvalidOperationError,
+        match=r"at position 0: first has .*product.*second has .*sku",
+    ):
+        pl.concat([lf1, lf2]).collect()
+
+
 def test_concat_df() -> None:
     df1 = pl.DataFrame({"a": [2, 1, 3], "b": [1, 2, 3], "c": [1, 2, 3]})
     df2 = pl.concat([df1, df1], rechunk=True)
