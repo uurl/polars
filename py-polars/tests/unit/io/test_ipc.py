@@ -587,3 +587,15 @@ def test_read_ipc_compressed_empty_bitmap_27532() -> None:
     f.seek(0)
 
     assert_frame_equal(pl.read_ipc(f), pl.DataFrame(schema={"bool": pl.Boolean}))
+
+
+@pytest.mark.write_disk
+def test_scan_ipc_memory_map_deprecated(tmp_path: Path) -> None:
+    path = tmp_path / "small.ipc"
+    expected = pl.DataFrame({"a": [1, 2, 3]})
+    expected.write_ipc(path)
+
+    with pytest.deprecated_call(match="memory_map"):
+        result = pl.scan_ipc(path, memory_map=False).collect()
+
+    assert_frame_equal(result, expected)
