@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
+import pyarrow as pa
 import pytest
 
 import polars as pl
@@ -406,3 +407,21 @@ def test_from_pandas_string_with_natype_17355(null: Any) -> None:
     result = pl.from_pandas(pd_df)
     expected = pl.DataFrame({"col": ["a", None]})
     assert_frame_equal(result, expected)
+
+
+def test_from_pandas_arrow_invalid_error_contains_column_row_record() -> None:
+    df = pd.DataFrame(
+        {
+            "id": [1, 2, 3],
+            "key_i": [1, 2, "0.1"],
+            "other": ["a", "b", "c"],
+        }
+    )
+    with pytest.raises(pa.ArrowInvalid) as exc_info:
+        pl.from_pandas(df)
+
+    msg = str(exc_info.value)
+    assert "column 'key_i'" in msg
+    assert "row 2" in msg
+    assert "offending record" in msg
+    assert "'key_i': '0.1'" in msg
