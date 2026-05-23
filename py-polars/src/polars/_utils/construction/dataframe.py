@@ -1132,9 +1132,20 @@ def pandas_to_pydf(
             )
 
     for col_idx, col_data in data.items():
-        arrow_dict[str(col_idx)] = plc.pandas_series_to_arrow(
-            col_data, nan_to_null=nan_to_null, length=length
-        )
+        col_name = str(col_idx)
+        try:
+            arrow_dict[col_name] = plc.pandas_series_to_arrow(
+                col_data, nan_to_null=nan_to_null, length=length
+            )
+        except pa.ArrowInvalid as e:
+            msg = _format_pandas_arrow_invalid_error(
+                error=e,
+                data=data,
+                column_name=col_name,
+                column_data=col_data,
+                nan_to_null=nan_to_null,
+            )
+            raise pa.ArrowInvalid(msg) from e
 
     arrow_table = pa.table(arrow_dict)
     return arrow_to_pydf(
@@ -1144,6 +1155,47 @@ def pandas_to_pydf(
         strict=strict,
         rechunk=rechunk,
     )
+
+
+def _format_pandas_arrow_invalid_error(
+    *,
+    error: pa.ArrowInvalid,
+    data: pd.DataFrame,
+    column_name: str,
+    column_data: pd.Series[Any],
+    nan_to_null: bool,
+) -> str:
+    row_idx = _find_pandas_arrow_invalid_row(
+        column_data=column_data,
+        nan_to_null=nan_to_null,
+    )
+
+    if row_idx is None:
+        return f"ArrowInvalid while converting column {column_name!r}: {error}"
+
+    record = data.iloc[row_idx].to_dict()
+    return (
+        f"ArrowInvalid while converting column {column_name!r} at row {row_idx}: "
+        f"{error}; offending record: {record!r}"
+    )
+
+
+def _find_pandas_arrow_invalid_row(
+    *,
+    column_data: pd.Series[Any],
+    nan_to_null: bool,
+) -> int | None:
+    for idx in range(len(column_data)):
+        try:
+            plc.pandas_series_to_arrow(
+                column_data.iloc[: idx + 1],
+                nan_to_null=nan_to_null,
+                length=idx + 1,
+            )
+        except pa.ArrowInvalid:  # noqa: PERF203
+            return idx
+
+    return None
 
 
 def _pandas_has_default_index(df: pd.DataFrame) -> bool:
