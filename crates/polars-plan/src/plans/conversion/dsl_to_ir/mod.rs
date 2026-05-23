@@ -140,6 +140,34 @@ async fn fetch_metadata(
     Ok::<(), PolarsError>(())
 }
 
+fn format_schema_mismatch_details(schema: &Schema, schema_i: &Schema) -> String {
+    use std::fmt::Write;
+
+    let mut out = String::new();
+
+    if schema.len() != schema_i.len() {
+        let _ = writeln!(
+            &mut out,
+            "schemas have different numbers of fields: first has {}, second has {}",
+            schema.len(),
+            schema_i.len(),
+        );
+    }
+
+    for (idx, ((left_name, left_dtype), (right_name, right_dtype))) in
+        schema.iter().zip(schema_i.iter()).enumerate()
+    {
+        if left_name != right_name || left_dtype != right_dtype {
+            let _ = writeln!(
+                &mut out,
+                "at position {idx}: first has {left_name:?} ({left_dtype}), second has {right_name:?} ({right_dtype})",
+            );
+        }
+    }
+
+    out
+}
+
 /// converts LogicalPlan to IR
 /// it adds expressions & lps to the respective arenas as it traverses the plan
 /// finally it returns the top node of the logical plan
@@ -217,10 +245,29 @@ pub fn to_alp_impl(lp: DslPlan, ctxt: &mut DslConversionContext) -> PolarsResult
             let schema = ctxt.lp_arena.get(first_n).schema(ctxt.lp_arena);
             for n in &inputs[1..] {
                 let schema_i = ctxt.lp_arena.get(*n).schema(ctxt.lp_arena);
-                // The first argument
-                schema_i.matches_schema(schema.as_ref()).map_err(|_| polars_err!(InvalidOperation:  "'union'/'concat' inputs should all have the same schema,\
-                    got\n{:?} and \n{:?}", schema, schema_i)
-                )?;
+
+                let same_names = schema
+                    .iter_names()
+                    .zip(schema_i.iter_names())
+                    .all(|(left, right)| left == right);
+
+                if schema.len() != schema_i.len() || !same_names {
+                    let details =
+                        format_schema_mismatch_details(schema.as_ref(), schema_i.as_ref());
+                    polars_bail!(
+                        InvalidOperation:
+                        "'union'/'concat' inputs should all have the same schema.\n\n{details}"
+                    );
+                }
+
+                schema_i.matches_schema(schema.as_ref()).map_err(|_| {
+                    let details =
+                        format_schema_mismatch_details(schema.as_ref(), schema_i.as_ref());
+                    polars_err!(
+                        InvalidOperation:
+                        "'union'/'concat' inputs should all have the same schema.\n\n{details}"
+                    )
+                })?;
             }
 
             let options = args.into();
