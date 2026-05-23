@@ -511,3 +511,14 @@ def test_concat_horizontal_lazy_strict_raises_shape_error_27415(
             }
         ),
     )
+
+
+def test_concat_mixed_lazy_and_eager_error() -> None:
+    lf = pl.LazyFrame({"x": [1]})
+    df = pl.DataFrame({"x": [2]})
+
+    with pytest.raises(TypeError, match="element 2 has type 'DataFrame'"):
+        pl.concat([lf, df])
+
+    with pytest.raises(TypeError, match="element 2 has type 'LazyFrame'"):
+        pl.concat([df, lf])

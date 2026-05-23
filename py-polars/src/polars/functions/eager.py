@@ -238,6 +238,18 @@ def concat(
         return lf.collect() if eager else lf  # type: ignore[return-value]
 
     out: Series | DataFrame | LazyFrame | Expr
+    first = elems[0]
+    valid_type = type(first)
+
+    if isinstance(first, (pl.DataFrame, pl.LazyFrame, pl.Series, pl.Expr)):
+        for i, elem in enumerate(elems):
+            if not isinstance(elem, valid_type):
+                msg = (
+                    "in `pl.concat()`, all elements must have the same type; "
+                    f"element 1 has type {qualified_type_name(first)!r} and "
+                    f"element {i + 1} has type {qualified_type_name(elem)!r}"
+                )
+                raise TypeError(msg)
 
     from polars.lazyframe.opt_flags import QueryOptFlags
 

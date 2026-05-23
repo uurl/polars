@@ -2180,6 +2180,15 @@ def collect_all(
         The collected DataFrames, returned in the same order as the input LazyFrames.
 
     """
+    lazy_frames = list(lazy_frames)
+    for i, lf in enumerate(lazy_frames):
+        if not isinstance(lf, pl.LazyFrame):
+            msg = (
+                "in `pl.collect_all()`, all elements must be LazyFrame instances; "
+                f"element {i + 1} has type {qualified_type_name(lf)!r}"
+            )
+            raise TypeError(msg)
+
     lfs = [lf._ldf for lf in lazy_frames]
     if lazy:
         msg = "the `lazy` parameter of `collect_all` is considered unstable."
