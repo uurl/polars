@@ -20,6 +20,17 @@ variants
 --8<-- "python/user-guide/sql/select.py:df"
 ```
 
+### WHERE
+
+The `WHERE` clause is used to filter rows before they are returned by the query. It can be used
+with comparison operators, logical operators, and SQL functions.
+
+{{code_block('user-guide/sql/select','where',['SQLexecute'])}}
+
+```python exec="on" result="text" session="user-guide/sql/select"
+--8<-- "python/user-guide/sql/select.py:where"
+```
+
 ### GROUP BY
 
 The `GROUP BY` statement is used to group rows in a table by one or more columns and compute
