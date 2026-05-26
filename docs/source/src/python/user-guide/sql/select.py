@@ -25,6 +25,17 @@ ctx = pl.SQLContext(population=df, eager=True)
 print(ctx.execute("SELECT * FROM population"))
 # --8<-- [end:df]
 
+# --8<-- [start:where]
+result = ctx.execute(
+    """
+        SELECT city, population
+        FROM population
+        WHERE population > 2500000
+    """
+)
+print(result)
+# --8<-- [end:where]
+
 # --8<-- [start:group_by]
 result = ctx.execute(
     """
