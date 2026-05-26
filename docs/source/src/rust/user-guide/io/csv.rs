@@ -21,6 +21,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // --8<-- [end:read]
     println!("{df}");
 
+    // --8<-- [start:schema_overwrite]
+    let csv = "id,value\n1,2\n2,text\n";
+
+    let mut schema_overwrite = Schema::with_capacity(1);
+    schema_overwrite.insert("value".into(), DataType::String);
+
+    let df = CsvReadOptions::default()
+        .with_schema_overwrite(Some(std::sync::Arc::new(schema_overwrite)))
+        .into_reader_with_file_handle(std::io::Cursor::new(csv))
+        .finish()
+        .unwrap();
+
+    assert_eq!(df.column("value")?.dtype(), &DataType::String);
+    // --8<-- [end:schema_overwrite]
+    
     // --8<-- [start:scan]
     let lf = LazyCsvReader::new(PlRefPath::new("docs/assets/data/path.csv"))
         .finish()
