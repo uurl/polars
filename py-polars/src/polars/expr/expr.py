@@ -2726,7 +2726,7 @@ class Expr:
 
     def search_sorted(
         self,
-        element: IntoExpr | np.ndarray[Any, Any],
+        element: IntoExpr,
         side: SearchSortedSide = "any",
         *,
         descending: bool = False,
