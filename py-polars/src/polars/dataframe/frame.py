@@ -6253,9 +6253,8 @@ class DataFrame:
         Return the `k` largest rows.
 
         Non-null elements are always preferred over null elements, regardless of
-        the value of `reverse`. The output is not guaranteed to be in any
-        particular order, call :func:`sort` after this function if you wish the
-        output to be sorted.
+        the value of `reverse`. The output is sorted by the `by` column(s) in
+        descending order.
 
         .. versionchanged:: 1.0.0
             The `descending` parameter was renamed `reverse`.
@@ -6342,9 +6341,8 @@ class DataFrame:
         Return the `k` smallest rows.
 
         Non-null elements are always preferred over null elements, regardless of
-        the value of `reverse`. The output is not guaranteed to be in any
-        particular order, call :func:`sort` after this function if you wish the
-        output to be sorted.
+        the value of `reverse`. The output is sorted by the `by` column(s) in
+        ascending order.
 
         .. versionchanged:: 1.0.0
             The `descending` parameter was renamed `reverse`.
