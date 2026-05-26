@@ -90,7 +90,7 @@ shorthand for multiple expressions. In the example below, we use expression expa
 the columns “weight” and “height” with a single expression. When using expression expansion you can
 use `.name.suffix` to add a suffix to the names of the original columns:
 
-{{code_block('user-guide/getting-started','expression-expansion',['select','alias','Expr.name'])}}
+{{code_block('user-guide/getting-started','expression-expansion',['select','alias','Expr.name'], [], ['round'])}}
 
 ```python exec="on" result="text" session="getting-started"
 --8<-- "python/user-guide/getting-started.py:expression-expansion"
@@ -156,7 +156,7 @@ here to ensure reproducibility of the examples.
 After using the context `group_by` we can use `agg` to compute aggregations over the resulting
 groups:
 
-{{code_block('user-guide/getting-started','group_by-agg',['group_by','agg'])}}
+{{code_block('user-guide/getting-started','group_by-agg',['group_by','agg'], [], ['round'])}}
 
 ```python exec="on" result="text" session="getting-started"
 --8<-- "python/user-guide/getting-started.py:group_by-agg"
@@ -168,7 +168,7 @@ Contexts and the expressions within can be chained to create more complex querie
 needs. In the example below we combine some of the contexts we have seen so far to create a more
 complex query:
 
-{{code_block('user-guide/getting-started','complex',['group_by','agg','select','with_columns','Expr.str','Expr.list'])}}
+{{code_block('user-guide/getting-started','complex',['group_by','agg','select','with_columns','Expr.str','Expr.list'], [], ['round'])}}
 
 ```python exec="on" result="text" session="getting-started"
 --8<-- "python/user-guide/getting-started.py:complex"
