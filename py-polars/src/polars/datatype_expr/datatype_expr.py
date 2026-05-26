@@ -153,24 +153,44 @@ class DataTypeExpr:
 
     def wrap_in_list(self) -> DataTypeExpr:
         """
-        Get the DataType wrapped in a list.
+        Get this DataType wrapped in a :class:`List`.
+
+        This is useful when the inner dtype should be derived from a schema or
+        expression context, rather than hard-coded. For example, it can be used
+        to construct ``List[<dtype of column>]``.
 
         Examples
         --------
         >>> pl.Int32.to_dtype_expr().wrap_in_list().collect_dtype({})
         List(Int32)
 
+        >>> schema = {"x": pl.Int64, "y": pl.String}
+        >>> pl.dtype_of("x").wrap_in_list().collect_dtype(schema)
+        List(Int64)
+        >>> pl.dtype_of("y").wrap_in_list().collect_dtype(schema)
+        List(String)
+
         """
         return DataTypeExpr._from_pydatatype_expr(self._pydatatype_expr.wrap_in_list())
 
     def wrap_in_array(self, *, width: int) -> DataTypeExpr:
         """
-        Get the DataType wrapped in an array.
+        Get this DataType wrapped in an :class:`Array`.
+
+        This constructs an array dtype expression whose inner dtype is derived
+        from the input dtype expression. It does not convert scalar values into
+        arrays by itself; the values must already be compatible with the
+        resulting fixed-size array dtype.
 
         Examples
         --------
         >>> pl.Int32.to_dtype_expr().wrap_in_array(width=5).collect_dtype({})
         Array(Int32, shape=(5,))
+
+        >>> schema = {"features": pl.Float32}
+        >>> pl.dtype_of("features").wrap_in_array(width=3).collect_dtype(schema)
+        Array(Float32, shape=(3,))
+
         """
         return DataTypeExpr._from_pydatatype_expr(
             self._pydatatype_expr.wrap_in_array(width)
